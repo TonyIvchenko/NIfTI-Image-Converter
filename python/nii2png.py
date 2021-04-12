@@ -1,18 +1,13 @@
-#!/usr/bin/env python
-#########################################
-#       nii2png for Python 3.7          #
-#         NIfTI Image Converter         #
-#                v0.2.9                 #
-#                                       #
-#     Written by Alexander Laurence     #
-# http://Celestial.Tokyo/~AlexLaurence/ #
-#    alexander.adamlaurence@gmail.com   #
-#              09 May 2019              #
-#              MIT License              #
-#########################################
+#!/usr/bin/env python3
+"""Convert 3D/4D NIfTI images into PNG slices."""
 
-import scipy, numpy, shutil, os, nibabel
-import sys, getopt
+import getopt
+import os
+import shutil
+import sys
+
+import nibabel
+import numpy
 
 import imageio
 
