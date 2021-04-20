@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert 3D/4D NIfTI images into PNG slices."""
 
-import getopt
+import argparse
 import os
 import shutil
 import sys
@@ -12,22 +12,20 @@ import numpy
 import imageio
 
 
+def parse_args(argv):
+    parser = argparse.ArgumentParser(
+        prog="nii2png.py",
+        description="Convert 3D/4D NIfTI images into PNG slices.",
+    )
+    parser.add_argument("-i", "--input", required=True, help="Path to input .nii/.nii.gz file.")
+    parser.add_argument("-o", "--output", required=True, help="Path to output directory for PNG files.")
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    inputfile = ''
-    outputfile = ''
-    try:
-        opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
-    except getopt.GetoptError:
-        print('nii2png.py -i <inputfile> -o <outputfile>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('nii2png.py -i <inputfile> -o <outputfile>')
-            sys.exit()
-        elif opt in ("-i", "--input"):
-            inputfile = arg
-        elif opt in ("-o", "--output"):
-            outputfile = arg
+    args = parse_args(argv)
+    inputfile = args.input
+    outputfile = args.output
 
     print('Input file is ', inputfile)
     print('Output folder is ', outputfile)
