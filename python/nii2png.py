@@ -3,8 +3,8 @@
 
 import argparse
 import os
-import shutil
 import sys
+from pathlib import Path
 
 import nibabel
 import numpy
@@ -25,10 +25,10 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     inputfile = args.input
-    outputfile = args.output
+    output_dir = Path(args.output)
 
     print('Input file is ', inputfile)
-    print('Output folder is ', outputfile)
+    print('Output folder is ', str(output_dir))
 
     # set fn as your 3D/4D nifti file
     image_array = nibabel.load(inputfile).get_fdata()
@@ -56,9 +56,9 @@ def main(argv):
         nx, ny, nz, nw = image_array.shape
 
         # set destination folder
-        if not os.path.exists(outputfile):
-            os.makedirs(outputfile)
-            print("Created ouput directory: " + outputfile)
+        if not output_dir.exists():
+            output_dir.mkdir(parents=True)
+            print("Created ouput directory: " + str(output_dir))
 
         print('Reading NIfTI file...')
 
@@ -87,15 +87,10 @@ def main(argv):
                     #alternate slices and save as png
                     print('Saving image...')
                     image_name = inputfile[:-4] + "_t" + "{:0>3}".format(str(current_volume+1)) + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
-                    imageio.imwrite(image_name, data)
+                    image_path = output_dir / os.path.basename(image_name)
+                    imageio.imwrite(image_path, data)
                     print('Saved.')
-
-                    #move images to folder
-                    print('Moving files...')
-                    src = image_name
-                    shutil.move(src, outputfile)
                     slice_counter += 1
-                    print('Moved.')
 
         print('Finished converting images')
 
@@ -105,9 +100,9 @@ def main(argv):
         nx, ny, nz = image_array.shape
 
         # set destination folder
-        if not os.path.exists(outputfile):
-            os.makedirs(outputfile)
-            print("Created ouput directory: " + outputfile)
+        if not output_dir.exists():
+            output_dir.mkdir(parents=True)
+            print("Created ouput directory: " + str(output_dir))
 
         print('Reading NIfTI file...')
 
@@ -134,15 +129,10 @@ def main(argv):
                 if (slice_counter % 1) == 0:
                     print('Saving image...')
                     image_name = inputfile[:-4] + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
-                    imageio.imwrite(image_name, data)
+                    image_path = output_dir / os.path.basename(image_name)
+                    imageio.imwrite(image_path, data)
                     print('Saved.')
-
-                    #move images to folder
-                    print('Moving image...')
-                    src = image_name
-                    shutil.move(src, outputfile)
                     slice_counter += 1
-                    print('Moved.')
 
         print('Finished converting images')
     else:
