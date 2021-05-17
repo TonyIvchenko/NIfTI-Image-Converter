@@ -56,6 +56,11 @@ def parse_args(argv):
         action="store_true",
         help="Run non-interactively with default answers.",
     )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite PNG files if they already exist.",
+    )
     return parser.parse_args(argv)
 
 
@@ -142,6 +147,9 @@ def main(argv):
                     print('Saving image...')
                     image_name = basename + "_t" + "{:0>3}".format(str(current_volume+1)) + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
                     image_path = output_dir / image_name
+                    if image_path.exists() and not args.overwrite:
+                        print(f"Skipping existing file: {image_path}")
+                        continue
                     imageio.imwrite(image_path, normalize_to_uint8(data))
                     print('Saved.')
                     slice_counter += 1
@@ -178,6 +186,9 @@ def main(argv):
                     print('Saving image...')
                     image_name = basename + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
                     image_path = output_dir / image_name
+                    if image_path.exists() and not args.overwrite:
+                        print(f"Skipping existing file: {image_path}")
+                        continue
                     imageio.imwrite(image_path, normalize_to_uint8(data))
                     print('Saved.')
                     slice_counter += 1
