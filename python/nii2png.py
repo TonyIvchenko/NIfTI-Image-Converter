@@ -66,6 +66,12 @@ def parse_args(argv):
         action="store_true",
         help="Print intended output files without writing them.",
     )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Reduce informational output.",
+    )
     return parser.parse_args(argv)
 
 
@@ -74,14 +80,18 @@ def main(argv):
     inputfile = args.input
     output_dir = Path(args.output)
 
+    def log(message):
+        if not args.quiet:
+            print(message)
+
     if not Path(inputfile).is_file():
         print(f"Input file does not exist: {inputfile}")
         sys.exit(2)
 
     basename = strip_nii_extension(inputfile)
 
-    print('Input file is ', inputfile)
-    print('Output folder is ', str(output_dir))
+    log(f"Input file is {inputfile}")
+    log(f"Output folder is {str(output_dir)}")
 
     # set fn as your 3D/4D nifti file
     try:
@@ -89,17 +99,17 @@ def main(argv):
     except Exception as exc:
         print(f"Unable to load NIfTI file '{inputfile}': {exc}")
         sys.exit(2)
-    print(len(image_array.shape))
+    log(str(len(image_array.shape)))
 
     rotation_degrees = 0
     if args.rotate is not None:
         rotation_degrees = args.rotate
         if rotation_degrees == 0:
-            print("Rotation disabled via --rotate 0.")
+            log("Rotation disabled via --rotate 0.")
         else:
-            print(f"Rotation set to {rotation_degrees} degrees via --rotate.")
+            log(f"Rotation set to {rotation_degrees} degrees via --rotate.")
     elif args.yes:
-        print("Running non-interactively with no rotation.")
+        log("Running non-interactively with no rotation.")
     else:
         ask_rotate = input('Would you like to rotate the orientation? (y/n) ')
 
@@ -112,7 +122,7 @@ def main(argv):
                 print('You must enter a value that is either 90, 180, or 270. Quitting...')
                 sys.exit()
         elif ask_rotate.lower() == 'n':
-            print('OK, Your images will be converted it as it is.')
+            log('OK, Your images will be converted it as it is.')
         else:
             print('You must choose either y or n. Quitting...')
             sys.exit()
@@ -125,9 +135,9 @@ def main(argv):
         # set destination folder
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
-            print("Created ouput directory: " + str(output_dir))
+            log("Created ouput directory: " + str(output_dir))
 
-        print('Reading NIfTI file...')
+        log('Reading NIfTI file...')
 
         total_volumes = image_array.shape[3]
         total_slices = image_array.shape[2]
@@ -140,7 +150,7 @@ def main(argv):
                 if (slice_counter % 1) == 0:
                     # rotate or no rotate
                     if rotation_degrees in (90, 180, 270):
-                        print('Rotating image...')
+                        log('Rotating image...')
                         data = rotate_slice(
                             image_array[:, :, current_slice, current_volume],
                             rotation_degrees,
@@ -149,20 +159,20 @@ def main(argv):
                         data = image_array[:, :, current_slice, current_volume]
                             
                     #alternate slices and save as png
-                    print('Saving image...')
+                    log('Saving image...')
                     image_name = basename + "_t" + "{:0>3}".format(str(current_volume+1)) + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
                     image_path = output_dir / image_name
                     if image_path.exists() and not args.overwrite:
-                        print(f"Skipping existing file: {image_path}")
+                        log(f"Skipping existing file: {image_path}")
                         continue
                     if args.dry_run:
-                        print(f"Would write: {image_path}")
+                        log(f"Would write: {image_path}")
                         continue
                     imageio.imwrite(image_path, normalize_to_uint8(data))
-                    print('Saved.')
+                    log('Saved.')
                     slice_counter += 1
 
-        print('Finished converting images')
+        log('Finished converting images')
 
     # else if 3D image inputted
     elif len(image_array.shape) == 3:
@@ -172,9 +182,9 @@ def main(argv):
         # set destination folder
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
-            print("Created ouput directory: " + str(output_dir))
+            log("Created ouput directory: " + str(output_dir))
 
-        print('Reading NIfTI file...')
+        log('Reading NIfTI file...')
 
         total_slices = image_array.shape[2]
 
@@ -191,20 +201,20 @@ def main(argv):
 
                 #alternate slices and save as png
                 if (slice_counter % 1) == 0:
-                    print('Saving image...')
+                    log('Saving image...')
                     image_name = basename + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
                     image_path = output_dir / image_name
                     if image_path.exists() and not args.overwrite:
-                        print(f"Skipping existing file: {image_path}")
+                        log(f"Skipping existing file: {image_path}")
                         continue
                     if args.dry_run:
-                        print(f"Would write: {image_path}")
+                        log(f"Would write: {image_path}")
                         continue
                     imageio.imwrite(image_path, normalize_to_uint8(data))
-                    print('Saved.')
+                    log('Saved.')
                     slice_counter += 1
 
-        print('Finished converting images')
+        log('Finished converting images')
     else:
         print(f"Not a 3D or 4D image. Got shape {image_array.shape}.")
         sys.exit(2)
