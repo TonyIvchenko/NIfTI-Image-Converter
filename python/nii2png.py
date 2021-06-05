@@ -36,6 +36,25 @@ def normalize_to_uint8(data):
     return (scaled * 255).astype(numpy.uint8)
 
 
+def iter_slices(image_array):
+    dims = len(image_array.shape)
+    if dims == 4:
+        total_volumes = image_array.shape[3]
+        total_slices = image_array.shape[2]
+        for current_volume in range(total_volumes):
+            for current_slice in range(total_slices):
+                yield current_volume + 1, current_slice + 1, image_array[:, :, current_slice, current_volume]
+        return
+
+    if dims == 3:
+        total_slices = image_array.shape[2]
+        for current_slice in range(total_slices):
+            yield None, current_slice + 1, image_array[:, :, current_slice]
+        return
+
+    raise ValueError(f"Not a 3D or 4D image. Got shape {image_array.shape}.")
+
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(
         prog="nii2png.py",
@@ -127,97 +146,45 @@ def main(argv):
             print('You must choose either y or n. Quitting...')
             sys.exit()
 
-    # if 4D image inputted
-    if len(image_array.shape) == 4:
-        # set 4d array dimension values
-        nx, ny, nz, nw = image_array.shape
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
+        log("Created ouput directory: " + str(output_dir))
 
-        # set destination folder
-        if not output_dir.exists():
-            output_dir.mkdir(parents=True)
-            log("Created ouput directory: " + str(output_dir))
+    log('Reading NIfTI file...')
 
-        log('Reading NIfTI file...')
+    try:
+        slices = iter_slices(image_array)
+        for volume_index, slice_index, slice_data in slices:
+            if rotation_degrees in (90, 180, 270):
+                log('Rotating image...')
+                slice_data = rotate_slice(slice_data, rotation_degrees)
 
-        total_volumes = image_array.shape[3]
-        total_slices = image_array.shape[2]
-
-        # iterate through volumes
-        for current_volume in range(0, total_volumes):
-            slice_counter = 0
-            # iterate through slices
-            for current_slice in range(0, total_slices):
-                if (slice_counter % 1) == 0:
-                    # rotate or no rotate
-                    if rotation_degrees in (90, 180, 270):
-                        log('Rotating image...')
-                        data = rotate_slice(
-                            image_array[:, :, current_slice, current_volume],
-                            rotation_degrees,
-                        )
-                    else:
-                        data = image_array[:, :, current_slice, current_volume]
-                            
-                    #alternate slices and save as png
-                    log('Saving image...')
-                    image_name = basename + "_t" + "{:0>3}".format(str(current_volume+1)) + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
-                    image_path = output_dir / image_name
-                    if image_path.exists() and not args.overwrite:
-                        log(f"Skipping existing file: {image_path}")
-                        continue
-                    if args.dry_run:
-                        log(f"Would write: {image_path}")
-                        continue
-                    imageio.imwrite(image_path, normalize_to_uint8(data))
-                    log('Saved.')
-                    slice_counter += 1
-
-        log('Finished converting images')
-
-    # else if 3D image inputted
-    elif len(image_array.shape) == 3:
-        # set 4d array dimension values
-        nx, ny, nz = image_array.shape
-
-        # set destination folder
-        if not output_dir.exists():
-            output_dir.mkdir(parents=True)
-            log("Created ouput directory: " + str(output_dir))
-
-        log('Reading NIfTI file...')
-
-        total_slices = image_array.shape[2]
-
-        slice_counter = 0
-        # iterate through slices
-        for current_slice in range(0, total_slices):
-            # alternate slices
-            if (slice_counter % 1) == 0:
-                # rotate or no rotate
-                if rotation_degrees in (90, 180, 270):
-                    data = rotate_slice(image_array[:, :, current_slice], rotation_degrees)
-                else:
-                    data = image_array[:, :, current_slice]
-
-                #alternate slices and save as png
-                if (slice_counter % 1) == 0:
-                    log('Saving image...')
-                    image_name = basename + "_z" + "{:0>3}".format(str(current_slice+1))+ ".png"
-                    image_path = output_dir / image_name
-                    if image_path.exists() and not args.overwrite:
-                        log(f"Skipping existing file: {image_path}")
-                        continue
-                    if args.dry_run:
-                        log(f"Would write: {image_path}")
-                        continue
-                    imageio.imwrite(image_path, normalize_to_uint8(data))
-                    log('Saved.')
-                    slice_counter += 1
-
-        log('Finished converting images')
-    else:
-        print(f"Not a 3D or 4D image. Got shape {image_array.shape}.")
+            log('Saving image...')
+            if volume_index is None:
+                image_name = basename + "_z" + "{:0>3}".format(str(slice_index)) + ".png"
+            else:
+                image_name = (
+                    basename
+                    + "_t"
+                    + "{:0>3}".format(str(volume_index))
+                    + "_z"
+                    + "{:0>3}".format(str(slice_index))
+                    + ".png"
+                )
+            image_path = output_dir / image_name
+            if image_path.exists() and not args.overwrite:
+                log(f"Skipping existing file: {image_path}")
+                continue
+            if args.dry_run:
+                log(f"Would write: {image_path}")
+                continue
+            imageio.imwrite(image_path, normalize_to_uint8(slice_data))
+            log('Saved.')
+    except ValueError as exc:
+        print(str(exc))
         sys.exit(2)
+
+    log('Finished converting images')
 
 # call the function to start the program
 if __name__ == "__main__":
