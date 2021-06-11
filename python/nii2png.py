@@ -152,6 +152,10 @@ def main(argv):
 
     log('Reading NIfTI file...')
 
+    written_count = 0
+    skipped_count = 0
+    preview_count = 0
+
     try:
         slices = iter_slices(image_array)
         for volume_index, slice_index, slice_data in slices:
@@ -174,17 +178,23 @@ def main(argv):
             image_path = output_dir / image_name
             if image_path.exists() and not args.overwrite:
                 log(f"Skipping existing file: {image_path}")
+                skipped_count += 1
                 continue
             if args.dry_run:
                 log(f"Would write: {image_path}")
+                preview_count += 1
                 continue
             imageio.imwrite(image_path, normalize_to_uint8(slice_data))
+            written_count += 1
             log('Saved.')
     except ValueError as exc:
         print(str(exc))
         sys.exit(2)
 
-    log('Finished converting images')
+    if args.dry_run:
+        print(f"Dry run complete. {preview_count} files would be written ({skipped_count} skipped).")
+    else:
+        print(f"Finished converting images. {written_count} files written ({skipped_count} skipped).")
 
 # call the function to start the program
 if __name__ == "__main__":
