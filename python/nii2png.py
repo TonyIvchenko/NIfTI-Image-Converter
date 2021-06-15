@@ -5,7 +5,6 @@ import argparse
 import sys
 from pathlib import Path
 
-import nibabel
 import numpy
 
 import imageio
@@ -114,6 +113,8 @@ def main(argv):
 
     # set fn as your 3D/4D nifti file
     try:
+        import nibabel
+
         image_array = nibabel.load(inputfile).get_fdata()
     except Exception as exc:
         print(f"Unable to load NIfTI file '{inputfile}': {exc}")
