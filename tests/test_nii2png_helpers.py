@@ -26,6 +26,11 @@ def test_rotate_slice_rotates_by_quadrants():
     assert np.array_equal(nii2png.rotate_slice(source, 270), np.array([[3, 1], [4, 2]]))
 
 
+def test_build_image_name_formats_3d_and_4d_outputs():
+    assert nii2png.build_image_name("scan", slice_index=7) == "scan_z007.png"
+    assert nii2png.build_image_name("scan", slice_index=7, volume_index=2) == "scan_t002_z007.png"
+
+
 def test_normalize_to_uint8_scales_range():
     source = np.array([[0.0, 2.0], [1.0, 3.0]])
     scaled = nii2png.normalize_to_uint8(source)

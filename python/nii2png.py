@@ -19,6 +19,12 @@ def strip_nii_extension(path):
     return Path(path).stem
 
 
+def build_image_name(base_name, slice_index, volume_index=None, index_width=3):
+    if volume_index is None:
+        return f"{base_name}_z{slice_index:0{index_width}d}.png"
+    return f"{base_name}_t{volume_index:0{index_width}d}_z{slice_index:0{index_width}d}.png"
+
+
 def rotate_slice(data, degrees):
     if degrees == 0:
         return data
@@ -165,17 +171,11 @@ def main(argv):
                 slice_data = rotate_slice(slice_data, rotation_degrees)
 
             log('Saving image...')
-            if volume_index is None:
-                image_name = basename + "_z" + "{:0>3}".format(str(slice_index)) + ".png"
-            else:
-                image_name = (
-                    basename
-                    + "_t"
-                    + "{:0>3}".format(str(volume_index))
-                    + "_z"
-                    + "{:0>3}".format(str(slice_index))
-                    + ".png"
-                )
+            image_name = build_image_name(
+                base_name=basename,
+                slice_index=slice_index,
+                volume_index=volume_index,
+            )
             image_path = output_dir / image_name
             if image_path.exists() and not args.overwrite:
                 log(f"Skipping existing file: {image_path}")
