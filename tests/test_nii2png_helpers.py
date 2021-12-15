@@ -29,6 +29,7 @@ def test_rotate_slice_rotates_by_quadrants():
 def test_build_image_name_formats_3d_and_4d_outputs():
     assert nii2png.build_image_name("scan", slice_index=7) == "scan_z007.png"
     assert nii2png.build_image_name("scan", slice_index=7, volume_index=2) == "scan_t002_z007.png"
+    assert nii2png.build_image_name("scan", slice_index=7, axis="x") == "scan_x007.png"
 
 
 def test_normalize_to_uint8_scales_range():
@@ -56,6 +57,17 @@ def test_iter_slices_for_3d_returns_no_volume_index():
     assert slices[0][0] is None
     assert slices[0][1] == 1
     assert np.array_equal(slices[0][2], image[:, :, 0])
+
+
+def test_iter_slices_for_3d_supports_axis_selection():
+    image = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+    slices_x = list(nii2png.iter_slices(image, axis="x"))
+    slices_y = list(nii2png.iter_slices(image, axis="y"))
+
+    assert len(slices_x) == 2
+    assert len(slices_y) == 3
+    assert np.array_equal(slices_x[1][2], image[1, :, :])
+    assert np.array_equal(slices_y[2][2], image[:, 2, :])
 
 
 def test_iter_slices_for_4d_returns_volume_and_slice_indices():

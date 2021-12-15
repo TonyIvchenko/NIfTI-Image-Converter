@@ -19,10 +19,14 @@ def strip_nii_extension(path):
     return Path(path).stem
 
 
-def build_image_name(base_name, slice_index, volume_index=None, index_width=3):
+def build_image_name(base_name, slice_index, volume_index=None, index_width=3, axis="z"):
+    if axis not in {"x", "y", "z"}:
+        raise ValueError(f"Unsupported axis '{axis}'. Expected one of: x, y, z.")
     if volume_index is None:
-        return f"{base_name}_z{slice_index:0{index_width}d}.png"
-    return f"{base_name}_t{volume_index:0{index_width}d}_z{slice_index:0{index_width}d}.png"
+        return f"{base_name}_{axis}{slice_index:0{index_width}d}.png"
+    return (
+        f"{base_name}_t{volume_index:0{index_width}d}_{axis}{slice_index:0{index_width}d}.png"
+    )
 
 
 def rotate_slice(data, degrees):
@@ -41,20 +45,30 @@ def normalize_to_uint8(data):
     return (scaled * 255).astype(numpy.uint8)
 
 
-def iter_slices(image_array):
+def iter_slices(image_array, axis="z"):
+    axis_to_index = {"x": 0, "y": 1, "z": 2}
+    if axis not in axis_to_index:
+        raise ValueError(f"Unsupported axis '{axis}'. Expected one of: x, y, z.")
+    axis_index = axis_to_index[axis]
+
     dims = len(image_array.shape)
     if dims == 4:
         total_volumes = image_array.shape[3]
-        total_slices = image_array.shape[2]
+        total_slices = image_array.shape[axis_index]
         for current_volume in range(total_volumes):
+            volume_data = image_array[:, :, :, current_volume]
             for current_slice in range(total_slices):
-                yield current_volume + 1, current_slice + 1, image_array[:, :, current_slice, current_volume]
+                yield (
+                    current_volume + 1,
+                    current_slice + 1,
+                    numpy.take(volume_data, current_slice, axis=axis_index),
+                )
         return
 
     if dims == 3:
-        total_slices = image_array.shape[2]
+        total_slices = image_array.shape[axis_index]
         for current_slice in range(total_slices):
-            yield None, current_slice + 1, image_array[:, :, current_slice]
+            yield None, current_slice + 1, numpy.take(image_array, current_slice, axis=axis_index)
         return
 
     raise ValueError(f"Not a 3D or 4D image. Got shape {image_array.shape}.")
@@ -95,6 +109,12 @@ def parse_args(argv):
         "--quiet",
         action="store_true",
         help="Reduce informational output.",
+    )
+    parser.add_argument(
+        "--axis",
+        choices=["x", "y", "z"],
+        default="z",
+        help="Spatial axis to slice along.",
     )
     return parser.parse_args(argv)
 
@@ -164,7 +184,7 @@ def main(argv):
     preview_count = 0
 
     try:
-        slices = iter_slices(image_array)
+        slices = iter_slices(image_array, axis=args.axis)
         for volume_index, slice_index, slice_data in slices:
             if rotation_degrees in (90, 180, 270):
                 log('Rotating image...')
@@ -175,6 +195,7 @@ def main(argv):
                 base_name=basename,
                 slice_index=slice_index,
                 volume_index=volume_index,
+                axis=args.axis,
             )
             image_path = output_dir / image_name
             if image_path.exists() and not args.overwrite:
