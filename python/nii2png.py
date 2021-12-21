@@ -133,6 +133,16 @@ def parse_args(argv):
         default="per-slice",
         help="Normalization strategy for intensity scaling to uint8.",
     )
+    parser.add_argument(
+        "--prefix",
+        help="Optional output basename override. Defaults to input filename stem.",
+    )
+    parser.add_argument(
+        "--index-width",
+        type=int,
+        default=3,
+        help="Zero-padding width for volume/slice indices.",
+    )
     return parser.parse_args(argv)
 
 
@@ -162,6 +172,9 @@ def main(argv):
     args = parse_args(argv)
     inputfile = args.input
     output_dir = Path(args.output)
+    if args.index_width < 1:
+        print("--index-width must be >= 1")
+        sys.exit(2)
 
     def log(message):
         if not args.quiet:
@@ -171,7 +184,7 @@ def main(argv):
         print(f"Input file does not exist: {inputfile}")
         sys.exit(2)
 
-    basename = strip_nii_extension(inputfile)
+    basename = args.prefix or strip_nii_extension(inputfile)
 
     log(f"Input file is {inputfile}")
     log(f"Output folder is {str(output_dir)}")
@@ -244,6 +257,7 @@ def main(argv):
                 base_name=basename,
                 slice_index=slice_index,
                 volume_index=volume_index,
+                index_width=args.index_width,
                 axis=args.axis,
             )
             image_path = output_dir / image_name

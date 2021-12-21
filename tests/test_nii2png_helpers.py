@@ -30,6 +30,7 @@ def test_build_image_name_formats_3d_and_4d_outputs():
     assert nii2png.build_image_name("scan", slice_index=7) == "scan_z007.png"
     assert nii2png.build_image_name("scan", slice_index=7, volume_index=2) == "scan_t002_z007.png"
     assert nii2png.build_image_name("scan", slice_index=7, axis="x") == "scan_x007.png"
+    assert nii2png.build_image_name("scan", slice_index=7, index_width=4) == "scan_z0007.png"
 
 
 def test_normalize_to_uint8_scales_range():
@@ -120,3 +121,9 @@ def test_build_manifest_captures_run_metadata():
     assert manifest["dry_run"] is True
     assert manifest["normalize"] == "global"
     assert len(manifest["records"]) == 1
+
+
+def test_parse_args_reads_prefix_and_index_width():
+    args = nii2png.parse_args(["-i", "in.nii.gz", "-o", "png", "--prefix", "case01", "--index-width", "4"])
+    assert args.prefix == "case01"
+    assert args.index_width == 4
