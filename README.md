@@ -31,9 +31,14 @@ python3 python/nii2png.py -i <input.nii.gz> -o <output_dir>
 - `-i, --input`: input NIfTI path (required)
 - `-o, --output`: output directory (required)
 - `-r, --rotate {0,90,180,270}`: rotate slices by fixed angle
+- `--axis {x,y,z}`: slice along selected spatial axis (default: `z`)
 - `-y, --yes`: run non-interactively with defaults
 - `--overwrite`: overwrite existing PNG files
 - `--dry-run`: print output file paths without writing files
+- `--normalize {per-slice,global}`: intensity scaling mode (`per-slice` by default)
+- `--prefix`: override output basename (default: input filename stem)
+- `--index-width`: zero-padding width for slice/volume indices (default: `3`)
+- `--manifest-json`: write conversion metadata + slice file records as JSON
 - `-q, --quiet`: reduce informational logs
 
 ### Examples
@@ -50,12 +55,36 @@ Rotate and overwrite existing files:
 python3 python/nii2png.py -i fmri.nii -o png --rotate 90 --overwrite
 ```
 
+Export along the `y` axis with global intensity normalization and a run manifest:
+
+```bash
+python3 python/nii2png.py \
+  -i ct.nii.gz \
+  -o png \
+  --axis y \
+  --normalize global \
+  --manifest-json png/manifest.json \
+  --yes
+```
+
 ## Output Naming
 
 - 3D NIfTI: `<basename>_z001.png`, `<basename>_z002.png`, ...
 - 4D NIfTI: `<basename>_t001_z001.png`, `<basename>_t001_z002.png`, ...
 
 `<basename>` is derived from input filename without `.nii` / `.nii.gz`.
+`z` changes to `x`/`y` when `--axis x|y` is used.
+
+## Interop Workflow
+
+This repository is intended to pair with:
+- `lungmask` for generating mask slices with matching naming/index rules.
+- `lung-segmentation` for model training/evaluation on paired `images/` and `masks/` PNG datasets.
+
+Recommended hand-off contract:
+1. Convert source volume(s) with fixed `--axis`, `--prefix`, and `--index-width`.
+2. Save `--manifest-json` and pass the same naming settings to mask export.
+3. Keep converter images and mask images in separate folders while preserving identical filenames.
 
 ## Matlab Usage
 
