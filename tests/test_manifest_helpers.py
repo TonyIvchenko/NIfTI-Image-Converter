@@ -27,3 +27,7 @@ def _sample_manifest():
             {"status": "weird", "path": "out/e.png", "slice_index": 7, "volume_index": 2},
         ],
     }
+
+
+def test_converter_input_path():
+    assert manifest_helpers.converter_input_path(_sample_manifest()) == "scan.nii.gz"
