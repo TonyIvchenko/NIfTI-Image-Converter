@@ -31,3 +31,7 @@ def _sample_manifest():
 
 def test_converter_input_path():
     assert manifest_helpers.converter_input_path(_sample_manifest()) == "scan.nii.gz"
+
+
+def test_converter_output_dir():
+    assert manifest_helpers.converter_output_dir(_sample_manifest()) == "out"
