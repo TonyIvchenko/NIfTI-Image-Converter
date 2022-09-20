@@ -19,3 +19,7 @@ def converter_input_path(manifest):
 
 def converter_output_dir(manifest):
     return manifest.get("output_dir")
+
+
+def converter_axis(manifest):
+    return manifest.get("axis")
