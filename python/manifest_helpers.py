@@ -23,3 +23,7 @@ def converter_output_dir(manifest):
 
 def converter_axis(manifest):
     return manifest.get("axis")
+
+
+def converter_rotation(manifest):
+    return manifest.get("rotate")
