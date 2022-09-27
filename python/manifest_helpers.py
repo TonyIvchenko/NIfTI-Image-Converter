@@ -27,3 +27,7 @@ def converter_axis(manifest):
 
 def converter_rotation(manifest):
     return manifest.get("rotate")
+
+
+def converter_normalization(manifest):
+    return manifest.get("normalize")
