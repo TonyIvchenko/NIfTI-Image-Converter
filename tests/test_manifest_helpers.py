@@ -43,3 +43,7 @@ def test_converter_axis():
 
 def test_converter_rotation():
     assert manifest_helpers.converter_rotation(_sample_manifest()) == 90
+
+
+def test_converter_normalization():
+    assert manifest_helpers.converter_normalization(_sample_manifest()) == "global"
