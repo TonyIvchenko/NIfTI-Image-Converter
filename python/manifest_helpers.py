@@ -31,3 +31,7 @@ def converter_rotation(manifest):
 
 def converter_normalization(manifest):
     return manifest.get("normalize")
+
+
+def converter_is_dry_run(manifest):
+    return bool(manifest.get("dry_run"))
