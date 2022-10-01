@@ -47,3 +47,7 @@ def test_converter_rotation():
 
 def test_converter_normalization():
     assert manifest_helpers.converter_normalization(_sample_manifest()) == "global"
+
+
+def test_converter_is_dry_run():
+    assert manifest_helpers.converter_is_dry_run(_sample_manifest()) is False
