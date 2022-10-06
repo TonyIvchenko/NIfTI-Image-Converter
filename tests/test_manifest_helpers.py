@@ -51,3 +51,7 @@ def test_converter_normalization():
 
 def test_converter_is_dry_run():
     assert manifest_helpers.converter_is_dry_run(_sample_manifest()) is False
+
+
+def test_converter_image_shape():
+    assert manifest_helpers.converter_image_shape(_sample_manifest()) == [256, 256, 32]
