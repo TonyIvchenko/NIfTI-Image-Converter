@@ -55,3 +55,7 @@ def test_converter_is_dry_run():
 
 def test_converter_image_shape():
     assert manifest_helpers.converter_image_shape(_sample_manifest()) == [256, 256, 32]
+
+
+def test_converter_records():
+    assert len(manifest_helpers.converter_records(_sample_manifest())) == 6
