@@ -59,3 +59,7 @@ def test_converter_image_shape():
 
 def test_converter_records():
     assert len(manifest_helpers.converter_records(_sample_manifest())) == 6
+
+
+def test_converter_record_count():
+    assert manifest_helpers.converter_record_count(_sample_manifest()) == 6
