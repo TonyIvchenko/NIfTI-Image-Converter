@@ -51,3 +51,7 @@ def converter_record_count(manifest):
 
 def converter_written_count(manifest):
     return sum(1 for record in _records(manifest) if record.get("status") == "written")
+
+
+def converter_skipped_count(manifest):
+    return sum(1 for record in _records(manifest) if record.get("status") == "skipped_existing")
