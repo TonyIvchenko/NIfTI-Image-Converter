@@ -59,3 +59,7 @@ def converter_skipped_count(manifest):
 
 def converter_dry_run_count(manifest):
     return sum(1 for record in _records(manifest) if record.get("status") == "dry_run")
+
+
+def converter_error_count(manifest):
+    return sum(1 for record in _records(manifest) if record.get("status") == "error")
