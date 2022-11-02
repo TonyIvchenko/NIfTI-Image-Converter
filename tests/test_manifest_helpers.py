@@ -83,3 +83,7 @@ def test_converter_error_count():
 
 def test_converter_all_paths():
     assert len(manifest_helpers.converter_all_paths(_sample_manifest())) == 6
+
+
+def test_converter_written_paths():
+    assert manifest_helpers.converter_written_paths(_sample_manifest()) == ["out/a.png", "out/b.png"]
