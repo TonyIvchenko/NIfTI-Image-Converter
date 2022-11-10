@@ -87,3 +87,7 @@ def test_converter_all_paths():
 
 def test_converter_written_paths():
     assert manifest_helpers.converter_written_paths(_sample_manifest()) == ["out/a.png", "out/b.png"]
+
+
+def test_converter_skipped_paths():
+    assert manifest_helpers.converter_skipped_paths(_sample_manifest()) == ["out/c.png"]
