@@ -75,3 +75,7 @@ def converter_written_paths(manifest):
 
 def converter_skipped_paths(manifest):
     return [record.get("path") for record in _records(manifest) if record.get("status") == "skipped_existing" and record.get("path")]
+
+
+def converter_dry_run_paths(manifest):
+    return [record.get("path") for record in _records(manifest) if record.get("status") == "dry_run" and record.get("path")]
