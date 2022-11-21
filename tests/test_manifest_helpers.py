@@ -99,3 +99,7 @@ def test_converter_dry_run_paths():
 
 def test_converter_error_paths():
     assert manifest_helpers.converter_error_paths(_sample_manifest()) == ["out/e.png"]
+
+
+def test_converter_has_records():
+    assert manifest_helpers.converter_has_records(_sample_manifest()) is True
