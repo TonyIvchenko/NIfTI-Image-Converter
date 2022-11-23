@@ -87,3 +87,7 @@ def converter_error_paths(manifest):
 
 def converter_has_records(manifest):
     return bool(_records(manifest))
+
+
+def converter_is_empty(manifest):
+    return not _records(manifest)
