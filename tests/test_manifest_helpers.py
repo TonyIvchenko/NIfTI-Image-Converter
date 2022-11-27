@@ -103,3 +103,7 @@ def test_converter_error_paths():
 
 def test_converter_has_records():
     assert manifest_helpers.converter_has_records(_sample_manifest()) is True
+
+
+def test_converter_is_empty():
+    assert manifest_helpers.converter_is_empty(_sample_manifest()) is False
