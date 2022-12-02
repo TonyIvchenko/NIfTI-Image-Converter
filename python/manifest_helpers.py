@@ -91,3 +91,7 @@ def converter_has_records(manifest):
 
 def converter_is_empty(manifest):
     return not _records(manifest)
+
+
+def converter_wrote_anything(manifest):
+    return converter_written_count(manifest) > 0
