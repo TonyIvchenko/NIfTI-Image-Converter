@@ -107,3 +107,7 @@ def test_converter_has_records():
 
 def test_converter_is_empty():
     assert manifest_helpers.converter_is_empty(_sample_manifest()) is False
+
+
+def test_converter_wrote_anything():
+    assert manifest_helpers.converter_wrote_anything(_sample_manifest()) is True
