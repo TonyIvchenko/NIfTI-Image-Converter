@@ -105,3 +105,10 @@ def converter_is_dry_run_only(manifest):
 def converter_has_duplicate_paths(manifest):
     paths = converter_all_paths(manifest)
     return len(paths) != len(set(paths))
+
+
+def converter_duplicate_paths(manifest):
+    counts = {}
+    for path in converter_all_paths(manifest):
+        counts[path] = counts.get(path, 0) + 1
+    return sorted([path for path, count in counts.items() if count > 1])
