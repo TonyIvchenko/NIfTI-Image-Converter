@@ -119,3 +119,7 @@ def test_converter_is_dry_run_only():
 
 def test_converter_has_duplicate_paths():
     assert manifest_helpers.converter_has_duplicate_paths(_sample_manifest()) is True
+
+
+def test_converter_duplicate_paths():
+    assert manifest_helpers.converter_duplicate_paths(_sample_manifest()) == ["out/e.png"]
