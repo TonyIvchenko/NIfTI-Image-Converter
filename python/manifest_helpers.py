@@ -116,3 +116,7 @@ def converter_duplicate_paths(manifest):
 
 def converter_unique_path_count(manifest):
     return len(set(converter_all_paths(manifest)))
+
+
+def converter_status_counts(manifest):
+    return _status_counts(_records(manifest))
