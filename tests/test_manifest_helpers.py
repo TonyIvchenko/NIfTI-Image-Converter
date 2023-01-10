@@ -137,3 +137,7 @@ def test_converter_status_counts():
         "error": 1,
         "weird": 1,
     }
+
+
+def test_converter_unknown_statuses():
+    assert manifest_helpers.converter_unknown_statuses(_sample_manifest()) == ["weird"]
