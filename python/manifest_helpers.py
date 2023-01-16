@@ -130,3 +130,11 @@ def converter_unknown_statuses(manifest, known_statuses=None):
         for status in converter_status_counts(manifest)
         if status not in known_statuses
     )
+
+
+def converter_slice_indices(manifest):
+    return sorted(
+        index
+        for index in (record.get("slice_index") for record in _records(manifest))
+        if isinstance(index, int)
+    )
