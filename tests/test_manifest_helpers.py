@@ -141,3 +141,7 @@ def test_converter_status_counts():
 
 def test_converter_unknown_statuses():
     assert manifest_helpers.converter_unknown_statuses(_sample_manifest()) == ["weird"]
+
+
+def test_converter_slice_indices():
+    assert manifest_helpers.converter_slice_indices(_sample_manifest()) == [1, 2, 4, 5, 6, 7]
