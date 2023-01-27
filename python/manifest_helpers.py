@@ -156,3 +156,13 @@ def converter_max_slice_index(manifest):
 def converter_min_slice_index(manifest):
     indices = converter_slice_indices(manifest)
     return min(indices) if indices else None
+
+
+def converter_missing_slice_indices(manifest):
+    indices = converter_slice_indices(manifest)
+    if not indices:
+        return []
+    lo = min(indices)
+    hi = max(indices)
+    existing = set(indices)
+    return [index for index in range(lo, hi + 1) if index not in existing]
