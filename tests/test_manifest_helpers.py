@@ -153,3 +153,7 @@ def test_converter_volume_indices():
 
 def test_converter_max_slice_index():
     assert manifest_helpers.converter_max_slice_index(_sample_manifest()) == 7
+
+
+def test_converter_min_slice_index():
+    assert manifest_helpers.converter_min_slice_index(_sample_manifest()) == 1
